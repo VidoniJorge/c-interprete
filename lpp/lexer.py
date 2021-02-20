@@ -23,35 +23,36 @@ class Lexer:
 
     def _character_to_token(self) -> Token:
         self._skip_whitespace()
-        if match(r'^=$', self._character):
+        #if match(r'^=$', self._character):
+        if self._is_token('='):
             token = Token(TokenType.ASSIGN, self._character)
-        elif match(r'^\+$', self._character):
+        elif self._is_token('\+'):
             token = Token(TokenType.PLUS, self._character)
-        elif match(r'^\-$', self._character):
+        elif self._is_token('\-'):
             token = Token(TokenType.MINUS, self._character)
-        elif match(r'^\/$', self._character):
+        elif self._is_token('\/'):
             token = Token(TokenType.DIVISION, self._character)
-        elif match(r'^\*$', self._character):
+        elif self._is_token('\*'):
             token = Token(TokenType.MULTIPLICATION, self._character)
-        elif match(r'^\!$', self._character):
+        elif self._is_token('\!'):
             token = Token(TokenType.NEGATION, self._character)
         elif match(r'^$', self._character):
             token = Token(TokenType.EOF, self._character)
-        elif match(r'^\($', self._character):
+        elif self._is_token('\('):
             token = Token(TokenType.LPAREN, self._character)
-        elif match(r'^\)$', self._character):
+        elif self._is_token('\)'):
             token = Token(TokenType.RPAREN, self._character)
-        elif match(r'^\{$', self._character):
+        elif self._is_token('\{'):
             token = Token(TokenType.LBRANCE, self._character)
-        elif match(r'^}$', self._character):
+        elif self._is_token('}'):
             token = Token(TokenType.RBRACE, self._character)
-        elif match(r'^,$', self._character):
+        elif self._is_token(','):
             token = Token(TokenType.COMMA, self._character)
-        elif match(r'^;$', self._character):
+        elif self._is_token(';'):
             token = Token(TokenType.SEMICOLON, self._character)
-        elif match(r'^<$', self._character):
+        elif self._is_token('<'):
             token = Token(TokenType.LT, self._character)
-        elif match(r'^>$', self._character):
+        elif self._is_token('>'):
             token = Token(TokenType.GT, self._character)
         elif self._is_letter(self._character):
             literal = self._read_identifier()
@@ -69,6 +70,12 @@ class Lexer:
 
         self._read_caracter()
         return token
+
+    # Función que valida si el token enviado es igual al carácter actual. Esto se realiza con la función 
+    # match por lo cual para poder evaluar los caracteres especiales que son parte de los utilizados para evaluar 
+    # expresiones regulares se tendrá que utilizar el caracter de escape \
+    def _is_token(self, token: str) -> bool:
+        return match(r'^' + token + '$', self._character)
 
     def _read_caracter(self):
         if self._read_position >= len(self._source):
