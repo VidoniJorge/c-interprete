@@ -16,6 +16,7 @@ class TokenType(Enum):
     DIVISION = auto() # /
     ELSE = auto()
     EOF = auto()
+    EQ = auto()
     FUNCTION = auto()
     FALSE = auto()
     GT = auto() # >
@@ -30,6 +31,7 @@ class TokenType(Enum):
     MINUS = auto()# -
     MULTIPLICATION = auto() # *
     NEGATION = auto() # !
+    NOT_EQ = auto()
     PLUS = auto()
     RBRACE = auto()
     RETURN = auto()

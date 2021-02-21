@@ -41,6 +41,26 @@ class LexerTest(TestCase):
         ]
 
         self.assertEqual(tokens, expected_tokens)
+    
+    def test_two_characters_operator(self) -> None:
+        source: str = '''
+            10 == 10;
+            10 != 11;
+        '''
+        tokens: List[Token] = self._load_n_tokens(source, 8)
+        
+        expected_tokens: List[Token] = [
+            Token(TokenType.INT, '10'),
+            Token(TokenType.EQ, '=='),
+            Token(TokenType.INT, "10"),
+            Token(TokenType.SEMICOLON, ";"),
+            Token(TokenType.INT, "10"),
+            Token(TokenType.NOT_EQ, "!="),
+            Token(TokenType.INT, "11"),
+            Token(TokenType.SEMICOLON, ";")
+        ]
+
+        self.assertEqual(tokens, expected_tokens)
 
     def test_eof(self) -> None:
         source: str = '+'
