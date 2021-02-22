@@ -80,7 +80,7 @@ class Lexer:
     # Función que valida si el token enviado es igual al carácter actual. Esto se realiza con la función 
     # match por lo cual para poder evaluar los caracteres especiales que son parte de los utilizados para evaluar 
     # expresiones regulares se tendrá que utilizar el caracter de escape \
-    def _is_token(self, token: str) -> bool:
+    def _is_token(self, token: str): # -> bool:
         return match(r'^' + token + '$', self._character)
 
     def _read_caracter(self):
@@ -94,8 +94,11 @@ class Lexer:
 
     def _read_identifier(self) -> str:
         initial_position = self._position
-        while self._is_letter(self._character) :
+        is_first_letter = True
+        while self._is_letter(self._character) or \
+                (not is_first_letter and self._is_number_(self._character)): 
             self._read_caracter()
+            is_first_letter = False
         
         return self._source[initial_position:self._position]
 
@@ -103,7 +106,6 @@ class Lexer:
     def _is_letter(self, character) -> bool:
         return bool(match(r'[a-zàèìòùA-ZÀÈÌÒÙñÑ_]',character))
 
-    
     def _read_number(self) -> str:
         initial_position = self._position
         while self._is_number_(self._character) :
@@ -116,7 +118,7 @@ class Lexer:
         return bool(match(r'^\d$',character))
     
     #Ignora el espacio en blanck
-    def _skip_whitespace(self) -> str:
+    def _skip_whitespace(self) -> None:
         while match(r'^\s$',self._character):
             self._read_caracter()
 

@@ -12,3 +12,9 @@ Ejemplo:
 Componente que se encarga de procesar caracter por caracter, para convertirlos en token
 
     source --> Lexer --> Token
+
+## REPL
+read evaluate print loop
+
+nosetests
+mypy . && nosetests

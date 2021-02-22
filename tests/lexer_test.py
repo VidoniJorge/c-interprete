@@ -189,6 +189,18 @@ class LexerTest(TestCase):
         ]
 
         self.assertEqual(tokens, expected_tokens)
+    
+    def test_variable_witch_number(self) -> None:
+        source: str = 'variable valor_1;'
+        tokens: List[TokenType] = self._load_n_tokens(source,3)
+
+        expected_tokens: List[Token] = [
+            Token(TokenType.LET, 'variable'),
+            Token(TokenType.IDENT, 'valor_1'),
+            Token(TokenType.SEMICOLON, ';'),
+        ]
+        print(tokens)
+        self.assertEqual(tokens, expected_tokens)
 
     def _load_tokens(self, source: str) -> List[Token]:
         lexer: Lexer = Lexer(source)
