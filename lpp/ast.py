@@ -3,7 +3,10 @@ from abc import(
     abstractclassmethod,
 )
 
-from typing import List
+from typing import (
+    List, 
+    Optional
+)
 
 from lpp.token import Token
 
@@ -25,7 +28,7 @@ class Statement(ASTNode):
     def token_literan(self) -> str:
         return self.token.literal
 
-class Expresiones(ASTNode):
+class Expression(ASTNode):
 
     def __init__(self, token: Token) -> None:
         self.token = token
@@ -51,3 +54,27 @@ class Program(ASTNode):
             out.append(str(statement))
         
         return ''.join(out)
+
+class Identifier(Expression):
+
+    def __init__(   self,
+                    token: Token,
+                    value: str) -> None:
+        super().__init__(token)
+        self.value = value
+    
+    def __str__(self) -> str:
+        return self.value
+
+class LetStatement(Statement):
+
+    def __init__(   self,
+                    token: Token,
+                    name: Optional[Identifier] = None,
+                    value: Optional[Expression] = None) -> None:
+        super().__init__(token)
+        self.name = name
+        self.value = value
+    
+    def __str__(self) -> str:
+        return f'{self.token_literan()} {str(self.name)} = {str(self.value)}'

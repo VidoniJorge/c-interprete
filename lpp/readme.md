@@ -1,6 +1,10 @@
 nosetests
 mypy . && nosetests
 
+https://docs.python.org/3/library/venv.html
+
+source <venv>/bin/activate
+
 # Análisis léxico
 
 ## Token
