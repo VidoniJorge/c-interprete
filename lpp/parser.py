@@ -7,7 +7,8 @@ from lpp.ast import (
     Identifier,
     LetStatement,
     Program,
-    Statement
+    Statement,
+    ReturnStatement
 )
 from lpp.lexer import Lexer
 
@@ -81,11 +82,30 @@ class Parser:
             self._advance_token()       
         
         return let_statement
+    
+    def _parser_return_statement(self) -> Optional[ReturnStatement]:
+        assert self._current_token is not None
+        return_statement = ReturnStatement(token=self._current_token)
+
+        self._advance_token()
+
+        # TODO terminar cuando sepamos parsear expresiones
+
+        while self._current_token.token_type != TokenType.SEMICOLON:
+            self._advance_token()
+
+        return return_statement
 
     def _parser_statement(self) -> Optional[Statement]:
         assert self._current_token is not None
         
         if self._current_token.token_type == TokenType.LET:
             return self._parser_let_statement()
+        elif self._current_token.token_type == TokenType.RETURN:
+            return self._parser_return_statement()
         else:
             return None
+
+    
+
+    
