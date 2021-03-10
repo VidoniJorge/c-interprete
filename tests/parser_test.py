@@ -8,6 +8,7 @@ from typing import (
 from lpp.ast import (
     Expression,
     Identifier,
+    Integer,
     Program,
     LetStatement,
     ReturnStatement,
@@ -106,6 +107,20 @@ class ParserTest(TestCase):
         expression_statement = cast(ExpressionStatement, program.statements[0])
         self._test_literal_expression(expression_statement.expression, 'foobar')
 
+    def test_integer_expressions(self) -> None:
+        source = str = '5';
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+        #si hay un error en el parser este test no va a decir que hay un error
+        self._test_program_statement(parser, program)
+        
+        exprassion_statement = cast(ExpressionStatement, program.statements[0])
+
+        assert exprassion_statement.expression is not None
+        self._test_literal_expression(exprassion_statement.expression, 5) 
+
     def _test_program_statement(self,
                                 parser: Parser,
                                 program: Program,
@@ -119,8 +134,10 @@ class ParserTest(TestCase):
                                 expected_value: Any) -> None:
         value_type: Type = type(expected_value)
 
-        if(value_type == str):
+        if value_type == str:
             self._test_identifier(expression, expected_value)
+        elif value_type == int:
+            self._test_integer(expression, expected_value)
         else:
             self.fail(f'Unhandled type of expression. Got={value_type}')
     
@@ -133,3 +150,12 @@ class ParserTest(TestCase):
         identifier = cast(Identifier, expression)
         self.assertEquals(identifier.value, expected_value)
         self.assertEquals(identifier.token.literal, expected_value)
+    
+    def _test_integer(  self,
+                        expression: Expression,
+                        expected_value: int) -> None:
+        self.assertIsInstance(expression,Integer)
+
+        integer = cast(Integer, expression)
+        self.assertEquals(integer.value, expected_value)
+        self.assertEquals(integer.token.literal, str(expected_value))
