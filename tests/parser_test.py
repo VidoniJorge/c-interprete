@@ -9,6 +9,7 @@ from lpp.ast import (
     Expression,
     Identifier,
     Integer,
+    Prefix,
     Program,
     LetStatement,
     ReturnStatement,
@@ -121,10 +122,34 @@ class ParserTest(TestCase):
         assert exprassion_statement.expression is not None
         self._test_literal_expression(exprassion_statement.expression, 5) 
 
+    def test_prefix_expression(self) -> None:
+        source = '!5; -15;'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statement(parser, program, expedted_statement_count=2)
+
+        for statement, (expected_operator, expected_value) in zip(
+            program.statements, (['!',5],['-',15])
+        ):
+            statement = cast(ExpressionStatement, statement)
+            self.assertIsInstance(statement.expression, Prefix)
+        
+            prefix = cast(Prefix, statement.expression)
+            self.assertEquals(prefix.operator, expected_operator)
+
+            assert prefix.right is not None
+            self._test_literal_expression(prefix.right, expected_value)
+
     def _test_program_statement(self,
                                 parser: Parser,
                                 program: Program,
                                 expedted_statement_count: int = 1) -> None:
+        if parser.errors:
+            print(parser.errors)
+
         self.assertEquals(len(parser.errors), 0)
         self.assertEquals(len(program.statements),expedted_statement_count)
         self.assertIsInstance(program.statements[0], ExpressionStatement)
