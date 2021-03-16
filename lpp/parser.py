@@ -158,6 +158,16 @@ class Parser:
 
         return expression_statement
 
+    def _parser_group_expression(self) -> Optional[Expression]: 
+        self._advance_token()
+
+        expression = self._parse_expression(Precedence.LOWEST)
+
+        if not self._expected_token(TokenType.RPAREN):
+            return None
+        
+        return expression
+
     def _parse_identifier(self) -> Identifier:
         assert self._current_token is not None
 
@@ -268,6 +278,7 @@ class Parser:
             TokenType.FALSE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
             TokenType.INT: self._parse_integer,
+            TokenType.LPAREN: self._parser_group_expression,
             TokenType.MINUS: self._parse_prifix_expression,
             TokenType.NEGATION: self._parse_prifix_expression,
             TokenType.TRUE: self._parse_boolean,

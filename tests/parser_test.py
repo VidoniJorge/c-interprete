@@ -224,6 +224,11 @@ class ParserTest(TestCase):
             ('verdadero + verdadero;','((verdadero) + (verdadero))',1),
             ('5 / 9 * 10','((5 / 9) * 10)',1),
             ('5 / 9 * 10; verdadero + verdadero;','((5 / 9) * 10)((verdadero) + (verdadero))',2),
+            ('3 < 5 == verdadero','((3 < 5) == (verdadero))',1),
+            ('1 + (2 + 3) + 4;', '((1 + (2 + 3)) + 4)', 1),
+            ('(5 + 5) * 2;', '((5 + 5) * 2)', 1),
+            ('2 / (5 + 5);', '(2 / (5 + 5))', 1),
+            ('-(5 + 5);', '(-(5 + 5))', 1),
         ] # Agregar 10
 
         for source, expected_result, expected_statement_count in test_sources:
