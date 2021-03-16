@@ -140,14 +140,16 @@ class ParserTest(TestCase):
             5 < 5;
             5 == 5;
             5 != 5;
-        '''
+            falso == falso;
+            verdadero != falso;
+        ''' #TODO algo de booleano -- esto rompe verdadero == verdadero;
 
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
         program: Program = parser.parse_program()
 
-        self._test_program_statement(parser, program, expedted_statement_count=8)
+        self._test_program_statement(parser, program, expedted_statement_count=10)
 
         expected_operators_and_values: List[Tuple[Any, str, Any]] = [
             (5,'+',5),
@@ -158,6 +160,8 @@ class ParserTest(TestCase):
             (5,'<',5),
             (5,'==',5),
             (5,'!=',5),
+            (False, '==', False),
+            (True, '!=', False)
         ]
 
         for statement, (expected_left, expected_operator, expected_right) in zip(
@@ -188,16 +192,16 @@ class ParserTest(TestCase):
         self._test_literal_expression(exprassion_statement.expression, 5) 
 
     def test_prefix_expression(self) -> None:
-        source = '!5; -15;'
+        source = '!5; -15; !falso; !verdadero'
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
         program: Program = parser.parse_program()
 
-        self._test_program_statement(parser, program, expedted_statement_count=2)
+        self._test_program_statement(parser, program, expedted_statement_count=4)
 
         for statement, (expected_operator, expected_value) in zip(
-            program.statements, (['!',5],['-',15])
+            program.statements, (['!',5],['-',15],['!',False],['!',True])
         ):
             statement = cast(ExpressionStatement, statement)
             self.assertIsInstance(statement.expression, Prefix)
@@ -207,6 +211,28 @@ class ParserTest(TestCase):
 
             assert prefix.right is not None
             self._test_literal_expression(prefix.right, expected_value)
+
+    def test_operator_precedence(self) ->None:
+        test_sources: List[Tuple[str, str, int]] = [
+            ('-a * b;','((-a) * b)',1),
+            ('!-a;','(!(-a))',1),
+            ('a + b / c;','(a + (b / c))',1),
+            ('3 + 4; -5 * 5;','(3 + 4)((-5) * 5)',2),
+            
+            ('verdadero;falso;verdadero;','(verdadero)(falso)(verdadero)',3),
+            ('!verdadero;!falso;verdadero;','(!(verdadero))(!(falso))(verdadero)',3),
+            ('verdadero + verdadero;','((verdadero) + (verdadero))',1),
+            ('5 / 9 * 10','((5 / 9) * 10)',1),
+            ('5 / 9 * 10; verdadero + verdadero;','((5 / 9) * 10)((verdadero) + (verdadero))',2),
+        ] # Agregar 10
+
+        for source, expected_result, expected_statement_count in test_sources:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+            program: Program = parser.parse_program()
+
+            self._test_program_statement(parser, program, expected_statement_count)
+            self.assertEquals(str(program), expected_result)
 
     def _test_boolean(  self,
                         expression: Expression,

@@ -148,4 +148,4 @@ class Boolean(Expression):
         self.value = value
         
     def __str__(self) -> str:
-        return self.token_literan()
+        return f'({self.token_literan()})'
