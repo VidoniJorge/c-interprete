@@ -8,9 +8,11 @@ from typing import (
 )
 
 from lpp.ast import (
+    Block,
     Boolean,
     Expression,
     ExpressionStatement,
+    If,
     Identifier,
     Infix,
     Integer,
@@ -110,9 +112,28 @@ class Parser:
     def _expected_token_error(self, token_type) -> None:
         assert self._peek_token is not None
         error = f'Se esperaba que el siguiente token fuera {token_type} ' + \
-            f'pero se obtuvo {self._peek_token.token_type}'
+            f'pero se obtuvo {self._peek_token.token_type} - {self._peek_token.literal}'
         
         self._errors.append(error)
+
+    def _parse_block(self) -> Optional[Block]:
+        assert self._current_token is not None
+
+        block_statement = Block(token=self._current_token,
+                                statements=[])
+        
+        self._advance_token()
+
+        while not self._current_token.token_type == TokenType.RBRACE \
+            and not self._current_token.token_type == TokenType.EOF:
+            statement = self._parser_statement()
+
+            if statement:
+                block_statement.statements.append(statement)
+            
+            self._advance_token()
+        
+        return block_statement
 
     def _parse_boolean(self) -> Boolean:
         assert self._current_token is not None
@@ -173,7 +194,38 @@ class Parser:
 
         return Identifier(  token=self._current_token,
                             value=self._current_token.literal)
- 
+    
+    def _parse_if(self) -> Optional[If]:
+        assert self._current_token is not None
+        if_expression = If(token=self._current_token)
+
+        if not self._expected_token(TokenType.LPAREN):
+            return None
+
+        self._advance_token()
+        
+        if_expression.condition = self._parse_expression(Precedence.LOWEST)
+        
+        if not self._expected_token(TokenType.RPAREN):
+            return None
+
+        if not self._expected_token(TokenType.LBRANCE):
+            return None
+        
+        if_expression.consequence = self._parse_block()
+
+        self._advance_token()
+        
+        if self._current_token is not None and self._current_token.token_type == TokenType.ELSE:
+            
+            if not self._expected_token(TokenType.LBRANCE):
+                return None
+
+            if_expression.alternative = self._parse_block()
+
+
+        return if_expression
+    
     def _parse_infix_expression(self, left: Expression) -> Infix:
         assert self._current_token is not None
         infix = Infix(  token=self._current_token,
@@ -277,6 +329,7 @@ class Parser:
         return {
             TokenType.FALSE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
+            TokenType.IF: self._parse_if,
             TokenType.INT: self._parse_integer,
             TokenType.LPAREN: self._parser_group_expression,
             TokenType.MINUS: self._parse_prifix_expression,
