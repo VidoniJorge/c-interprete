@@ -351,10 +351,15 @@ class Parser:
         if not self._expected_token(TokenType.ASSIGN) :
             return None
         
-        #TODO terminar cuando sepamos parsear expreciones
-        while self._current_token.token_type != TokenType.SEMICOLON and self._current_token.token_type != TokenType.EOF:
-            self._advance_token()       
+        self._advance_token()
+
+        let_statement.value = self._parse_expression(Precedence.LOWEST)
+
+        assert self._peek_token is not None
         
+        if self._peek_token.token_type == TokenType.SEMICOLON:
+            self._advance_token()
+
         return let_statement
     
     def _parse_prifix_expression(self) -> Prefix:
@@ -374,9 +379,11 @@ class Parser:
 
         self._advance_token()
 
-        # TODO terminar cuando sepamos parsear expresiones
+        return_statement.return_value = self._parse_expression(Precedence.LOWEST)
 
-        while self._current_token.token_type != TokenType.SEMICOLON:
+        assert self._peek_token is not None
+
+        if self._peek_token.token_type == TokenType.SEMICOLON:
             self._advance_token()
 
         return return_statement
