@@ -12,6 +12,7 @@ from lpp.ast import (
     Boolean,
     Expression,
     ExpressionStatement,
+    Function,
     If,
     Identifier,
     Infix,
@@ -179,6 +180,55 @@ class Parser:
 
         return expression_statement
 
+    def _parser_function(self) -> Optional[Function]:
+        assert self._current_token is not None
+        function = Function(token=self._current_token)
+
+        if not self._expected_token(TokenType.LPAREN):
+            return None
+        
+        function.parameters = self._parse_parameters()
+
+        if not self._expected_token(TokenType.LBRANCE):
+            return None
+        
+        function.body = self._parse_block()
+
+        return function
+    
+    def _parse_parameters(self) -> List[Identifier]:
+        params: List[Identifier] = []
+        
+        assert self._peek_token is not None
+
+        if self._peek_token.token_type == TokenType.RPAREN:
+            self._advance_token()
+            return params
+        
+        self._advance_token()
+
+        #TODO ver de cambiar por el _parser_Identifier
+        assert self._current_token is not None
+        identifier = self._create_identifier()
+        params.append(identifier)
+
+        while self._peek_token.token_type == TokenType.COMMA:
+            self._advance_token()
+            self._advance_token()
+            
+            identifier = self._create_identifier()
+            params.append(identifier)
+        
+        if not self._expected_token(TokenType.RPAREN):
+            return []
+
+        return params
+
+    def _create_identifier(self) -> Identifier:
+        assert self._current_token is not None
+        return Identifier(  token=self._current_token,
+                            value=self._current_token.literal)
+    
     def _parser_group_expression(self) -> Optional[Expression]: 
         self._advance_token()
 
@@ -328,6 +378,7 @@ class Parser:
     def _register_prefix_fns(self) -> PrefixParseFns:
         return {
             TokenType.FALSE: self._parse_boolean,
+            TokenType.FUNCTION: self._parser_function,
             TokenType.IDENT: self._parse_identifier,
             TokenType.IF: self._parse_if,
             TokenType.INT: self._parse_integer,
