@@ -24,7 +24,7 @@ class TokenType(Enum):
     IF = auto()
     ILLEGAL = auto()
     INT = auto()
-    LBRANCE = auto()
+    LBRACE = auto()
     LET = auto()
     LPAREN = auto()
     LT = auto()# <

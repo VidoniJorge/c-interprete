@@ -49,7 +49,7 @@ class Lexer:
         elif self._is_token('\)'):
             token = Token(TokenType.RPAREN, self._character)
         elif self._is_token('\{'):
-            token = Token(TokenType.LBRANCE, self._character)
+            token = Token(TokenType.LBRACE, self._character)
         elif self._is_token('}'):
             token = Token(TokenType.RBRACE, self._character)
         elif self._is_token(','):
