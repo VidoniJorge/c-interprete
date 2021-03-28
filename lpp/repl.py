@@ -12,6 +12,8 @@ from lpp.token import (
     TokenType
 )
 
+from lpp.evaluator import evaluate
+
 EOF_TOKEN: Token = Token(TokenType.EOF, '')
 
 def clear(): 
@@ -46,32 +48,9 @@ def start_repl() -> None:
                 _print_parse_erros(parser.errors)
                 continue
             
-            print(program)
-
-            str_program: str = program.__str__()
-            statement: str = ''
-            count_paremt = 0
-            for i, caracter in enumerate(str_program):
-                if caracter == '(':
-                    _print_statement(caracter,count_paremt)
-                    count_paremt +=1
-                elif caracter == ')':
-                    if statement != '':
-                        _print_statement(statement,count_paremt)
-                    count_paremt -=1
-                    _print_statement(caracter,count_paremt)
-                    statement = ''
-                elif caracter == ';':
-                    statement += caracter
-                    if statement != '':
-                        _print_statement(statement,count_paremt)
-                    statement = ''
-                else:
-                    if not (statement == '' and caracter == ' '):
-                        statement += caracter
-                
-            _print_statement(statement,count_paremt)
-            
+            evaluated = evaluate(program)
+            if evaluated is not None:
+                print(evaluated.inspect())
 
 
                 
