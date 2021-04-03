@@ -11,7 +11,8 @@ from lpp.object import(
     Integer,
     Null,
     Object,
-    ObjectType
+    ObjectType,
+    Return
 )
 
 TRUE = Boolean(True)
@@ -23,7 +24,7 @@ def evaluate(node:ast.ASTNode) -> Optional[Object]:
 
     if node_type == ast.Program:
         node = cast(ast.Program, node)
-        return _evaluate_statements(node.statements)
+        return _evaluate_program(node)
     elif node_type == ast.ExpressionStatement:
         node = cast(ast.ExpressionStatement, node)
         assert node.expression is not None
@@ -52,6 +53,19 @@ def evaluate(node:ast.ASTNode) -> Optional[Object]:
 
         assert right is not None and left is not None
         return _evaluate_infix_expression(node.operator, left, right)
+    elif node_type == ast.Block:
+        node = cast(ast.Block, node)
+        return _evaluate_block_statement(node)
+    elif node_type == ast.If:
+        node = cast(ast.If, node)
+        return _evaluate_if_expression(node)
+    
+    elif node_type == ast.ReturnStatement:
+        node = cast(ast.ReturnStatement, node)
+        assert node.return_value is not None
+        value = evaluate(node.return_value)
+        assert value is not None
+        return Return(value)
     
     return None
 
@@ -64,6 +78,40 @@ def _evaluate_bang_operator_expression(right: Object) -> Object:
         return TRUE
     else:
         return FALSE
+
+def _evaluate_if_expression(if_expression: ast.If) -> Optional[Object]:
+    assert if_expression.condition is not None
+    condition = evaluate(if_expression.condition)
+
+    assert condition is not None
+    if _is_truthy(condition):
+        assert if_expression.consequence is not None
+        return evaluate(if_expression.consequence)
+    elif if_expression.alternative is not None:
+        return evaluate(if_expression.alternative)
+    else:
+        return NULL
+
+def _is_truthy(obj: Object) -> bool:
+    if obj is NULL:
+        return False
+    elif obj is TRUE:
+        return True
+    elif obj is FALSE:
+        return False
+    else:
+        return True
+
+def _evaluate_block_statement(block: ast.Block) -> Optional[Object]:
+    result: Optional[Object] = None
+
+    for statement in block.statements:
+        result = evaluate(statement)
+
+        if result is not None and result.type() == ObjectType.RETURN:
+            return result
+
+    return result
 
 def _evaluate_infix_expression(operator:str, left:Object, right:Object) -> Object:
     if left.type() == ObjectType.INTEGER \
@@ -99,9 +147,6 @@ def _evaluate_integer_infix_expression(operator: str, left: Object, right: Objec
     else:
         return NULL
 
-
-
-
 def _evaluate_minus_operator_expression(right: Object) -> Object:
     if type(right) != Integer:
         return NULL
@@ -118,11 +163,15 @@ def _evaluate_prifx_expression(operator: str, right: Object) -> Object:
     else:
         return NULL
 
-def _evaluate_statements(statements: List[ast.Statement]) -> Optional[Object]:
+def _evaluate_program(program: ast.Program) -> Optional[Object]:
     result: Optional[Object] = None
     
-    for statement in statements:
+    for statement in program.statements:
         result = evaluate(statement)
+
+        if type(result) == Return:
+            result = cast(Return, result)
+            return result.value
     
     return result
 
