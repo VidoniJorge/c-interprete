@@ -10,6 +10,7 @@ from enum import(
 
 class ObjectType(Enum):
     BOOLEAN = auto()
+    ERROR = auto()
     INTEGER = auto()
     NULL = auto()
     RETURN = auto()
@@ -24,17 +25,6 @@ class Object(ABC):
     def inspect(self) -> str:
         pass
 
-class Integer(Object):
-
-    def __init__(self, value: int) -> None:
-        self.value = value
-
-    def type(self) -> ObjectType:
-        return ObjectType.INTEGER
-
-    def inspect(self) -> str:
-        return str(self.value)
-
 class Boolean(Object):
 
     def __init__(self, value: bool) -> None:
@@ -45,6 +35,28 @@ class Boolean(Object):
 
     def inspect(self) -> str:
         return 'verdadero' if self.value else 'falso'
+
+class Error(Object):
+
+    def __init__(self, message) -> None:
+        self.message = message
+    
+    def type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return f'Error: {self.message}'
+
+class Integer(Object):
+
+    def __init__(self, value: int) -> None:
+        self.value = value
+
+    def type(self) -> ObjectType:
+        return ObjectType.INTEGER
+
+    def inspect(self) -> str:
+        return str(self.value)
 
 class Null(Object):
 
