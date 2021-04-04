@@ -20,9 +20,9 @@ class ASTTest(TestCase):
         
         program: Program = Program(statements=[
                 LetStatement(
-                    token = Token(TokenType.LET, literal='variable'), 
-                    name  = Identifier(token = Token(TokenType.IDENT, literal = 'mi_var'), value = 'mi_var' ),
-                    value = Identifier(token = Token(TokenType.IDENT, literal = 'otra_variable'), value = 'otra_var')
+                    token = Token(TokenType.LET, literal='variable', line=1), 
+                    name  = Identifier(token = Token(TokenType.IDENT, literal = 'mi_var', line=1), value = 'mi_var' ),
+                    value = Identifier(token = Token(TokenType.IDENT, literal = 'otra_variable', line=1), value = 'otra_var')
                 )
             ]
         )
@@ -35,9 +35,9 @@ class ASTTest(TestCase):
         program: Program = Program(
             statements=[
                 ReturnStatement(
-                    token = Token(TokenType.RETURN, literal='regresa'),
+                    token = Token(TokenType.RETURN, literal='regresa', line=1),
                     return_value = Identifier(
-                                Token(TokenType.IDENT, literal = 'otra_variable'), 
+                                Token(TokenType.IDENT, literal = 'otra_variable',line=1), 
                                 value = '5'
                             )
                 )
@@ -51,9 +51,9 @@ class ASTTest(TestCase):
         program: Program = Program(
             statements=[
                 ExpressionStatement(
-                    token = Token(TokenType.INT, literal='5'),
+                    token = Token(TokenType.INT, literal='5', line=1),
                     expression = Integer(
-                                Token(TokenType.INT, literal='5'), 
+                                Token(TokenType.INT, literal='5', line=1), 
                                 value = 5
                             )
                 )

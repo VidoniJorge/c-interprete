@@ -14,7 +14,7 @@ from lpp.token import (
 
 from lpp.evaluator import evaluate
 
-EOF_TOKEN: Token = Token(TokenType.EOF, '')
+#EOF_TOKEN: Token = Token(TokenType.EOF, '')
 
 def clear(): 
   

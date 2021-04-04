@@ -36,6 +36,7 @@ def evaluate(node:ast.ASTNode) -> Optional[Object]:
         node = cast(ast.ExpressionStatement, node)
         assert node.expression is not None
         return evaluate(node.expression)
+    
     elif node_type == ast.Integer:
         node = cast(ast.Integer, node)
         assert node.value is not None
@@ -44,25 +45,26 @@ def evaluate(node:ast.ASTNode) -> Optional[Object]:
         node = cast(ast.Boolean, node)
         assert node.value is not None
         return _to_boolean_object(node.value)
+    
     elif node_type == ast.Prefix:
         node = cast(ast.Prefix, node)
         assert node.right is not None
         right = evaluate(node.right)
-
         assert right is not None
-        return _evaluate_prifix_expression(node.operator, right)
+        return _evaluate_prifix_expression(node.operator, right, node.right.token.line)
+    
     elif node_type == ast.Infix:
         node = cast(ast.Infix, node)
-
         assert node.left is not None and node.right is not None
         left = evaluate(node.left)
         right = evaluate(node.right)
-
         assert right is not None and left is not None
-        return _evaluate_infix_expression(node.operator, left, right)
+        return _evaluate_infix_expression(node.operator, left, right, node.left.token.line)
+    
     elif node_type == ast.Block:
         node = cast(ast.Block, node)
         return _evaluate_block_statement(node)
+    
     elif node_type == ast.If:
         node = cast(ast.If, node)
         return _evaluate_if_expression(node)
@@ -121,10 +123,10 @@ def _evaluate_block_statement(block: ast.Block) -> Optional[Object]:
 
     return result
 
-def _evaluate_infix_expression(operator:str, left:Object, right:Object) -> Object:
+def _evaluate_infix_expression(operator:str, left:Object, right:Object, line_evaluated:int) -> Object:
     if left.type() == ObjectType.INTEGER \
         and right.type() == ObjectType.INTEGER:
-        return _evaluate_integer_infix_expression(operator, left, right)
+        return _evaluate_integer_infix_expression(operator, left, right, line_evaluated)
     elif operator == '==':
         return _to_boolean_object(left is right)
     elif operator == '!=':
@@ -133,14 +135,14 @@ def _evaluate_infix_expression(operator:str, left:Object, right:Object) -> Objec
         return _new_error(_TYPE_MISMATCH, [left.type().name,
                 operator,
                 right.type().name
-            ])
+            ], line_evaluated)
     else:
         return _new_error(_UNKNOWN_INFIX_OPERATOR,[left.type().name,
                 operator,
                 right.type().name
-            ])
+            ], line_evaluated)
 
-def _evaluate_integer_infix_expression(operator: str, left: Object, right: Object) -> Object:
+def _evaluate_integer_infix_expression(operator: str, left: Object, right: Object, line_evaluated:int) -> Object:
     left_value = int = cast(Integer, left).value
     right_value = int = cast(Integer, right).value
 
@@ -164,23 +166,23 @@ def _evaluate_integer_infix_expression(operator: str, left: Object, right: Objec
         return _new_error(_UNKNOWN_INFIX_OPERATOR,[left.type().name,
                 operator,
                 right.type().name
-            ])
+            ], line_evaluated)
 
-def _evaluate_minus_operator_expression(right: Object) -> Object:
+def _evaluate_minus_operator_expression(right: Object, line_evaluated:int) -> Object:
     if type(right) != Integer:
-        return _new_error(_UNKNOWN_PREFIX_OPERATOR, ['-', right.type().name])
+        return _new_error(_UNKNOWN_PREFIX_OPERATOR, ['-', right.type().name], line_evaluated)
     
     right = cast(Integer, right)
 
     return Integer(-right.value)
 
-def _evaluate_prifix_expression(operator: str, right: Object) -> Object:
+def _evaluate_prifix_expression(operator: str, right: Object,line_evaluated:int) -> Object:
     if operator == '!':
         return _evaluate_bang_operator_expression(right)
     elif operator == '-':
-        return _evaluate_minus_operator_expression(right)
+        return _evaluate_minus_operator_expression(right, line_evaluated)
     else:
-        return _new_error(_UNKNOWN_PREFIX_OPERATOR,[operator, right.type().name])
+        return _new_error(_UNKNOWN_PREFIX_OPERATOR,[operator, right.type().name],line_evaluated)
 
 def _evaluate_program(program: ast.Program) -> Optional[Object]:
     result: Optional[Object] = None
@@ -196,8 +198,8 @@ def _evaluate_program(program: ast.Program) -> Optional[Object]:
     
     return result
 
-def _new_error(message: str, args:List[Any]) -> Error:
-    return Error(message.format(*args))
+def _new_error(message: str, args:List[Any], error_line: int) -> Error:
+    return Error(message.format(*args), error_line)
 
 def _to_boolean_object(value: bool) -> Boolean:
     return TRUE if value else FALSE

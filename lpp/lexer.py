@@ -10,6 +10,7 @@ class Lexer:
     
     #Constructor
     def __init__(self, source: str) -> None:
+        self._current_line = 1
         self._source: str = source
         self._character: str = ''
         self._read_position: int = 0
@@ -28,38 +29,38 @@ class Lexer:
             if self.sefl_peek_character() == '=':
                 token = self._make_two_character_token(TokenType.EQ)
             else:
-                token = Token(TokenType.ASSIGN, self._character)
+                token = Token(TokenType.ASSIGN, self._character, self._current_line)
         elif self._is_token('\+'):
-            token = Token(TokenType.PLUS, self._character)
+            token = Token(TokenType.PLUS, self._character, self._current_line)
         elif self._is_token('\-'):
-            token = Token(TokenType.MINUS, self._character)
+            token = Token(TokenType.MINUS, self._character, self._current_line)
         elif self._is_token('\/'):
-            token = Token(TokenType.DIVISION, self._character)
+            token = Token(TokenType.DIVISION, self._character, self._current_line)
         elif self._is_token('\*'):
-            token = Token(TokenType.MULTIPLICATION, self._character)
+            token = Token(TokenType.MULTIPLICATION, self._character, self._current_line)
         elif self._is_token('\!'):
             if self.sefl_peek_character() == '=':
                 token = self._make_two_character_token(TokenType.NOT_EQ)
             else:
-                token = Token(TokenType.NEGATION, self._character)
+                token = Token(TokenType.NEGATION, self._character, self._current_line)
         elif match(r'^$', self._character):
-            token = Token(TokenType.EOF, self._character)
+            token = Token(TokenType.EOF, self._character, self._current_line)
         elif self._is_token('\('):
-            token = Token(TokenType.LPAREN, self._character)
+            token = Token(TokenType.LPAREN, self._character, self._current_line)
         elif self._is_token('\)'):
-            token = Token(TokenType.RPAREN, self._character)
+            token = Token(TokenType.RPAREN, self._character, self._current_line)
         elif self._is_token('\{'):
-            token = Token(TokenType.LBRACE, self._character)
+            token = Token(TokenType.LBRACE, self._character, self._current_line)
         elif self._is_token('}'):
-            token = Token(TokenType.RBRACE, self._character)
+            token = Token(TokenType.RBRACE, self._character, self._current_line)
         elif self._is_token(','):
-            token = Token(TokenType.COMMA, self._character)
+            token = Token(TokenType.COMMA, self._character, self._current_line)
         elif self._is_token(';'):
-            token = Token(TokenType.SEMICOLON, self._character)
+            token = Token(TokenType.SEMICOLON, self._character, self._current_line)
         elif self._is_token('<'):
-            token = Token(TokenType.LT, self._character)
+            token = Token(TokenType.LT, self._character, self._current_line)
         elif self._is_token('>'):
-            token = Token(TokenType.GT, self._character)
+            token = Token(TokenType.GT, self._character, self._current_line)
         elif self._is_letter(self._character):
             literal = self._read_identifier()
             token_type = lookup_token_type(literal)
@@ -67,12 +68,12 @@ class Lexer:
             # se cambio por el problema el _read_caracter donde no pasaba la prueba 
             # test_function_declaration por no tener espacios en blanco entre la declaracion
             # del procedimiento y el ()
-            return Token(token_type, literal)
+            return Token(token_type, literal, self._current_line)
         elif self._is_number_(self._character):
             literal = self._read_number()
-            return Token(TokenType.INT, literal)
+            return Token(TokenType.INT, literal, self._current_line)
         else:
-            token = Token(TokenType.ILLEGAL, self._character)
+            token = Token(TokenType.ILLEGAL, self._character, self._current_line)
 
         self._read_caracter()
         return token
@@ -89,6 +90,9 @@ class Lexer:
         else:
             self._character = self._source[self._read_position]
         
+        if self._character == '\n':
+            self._current_line +=1 
+
         self._position = self._read_position
         self._read_position += 1
 
@@ -132,4 +136,4 @@ class Lexer:
         self._read_caracter()
         suffix = self._character
 
-        return Token(token_type, f'{prefix}{suffix}')
+        return Token(token_type, f'{prefix}{suffix}', self._current_line)

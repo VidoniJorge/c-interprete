@@ -102,6 +102,7 @@ class EvaluatorTest(TestCase):
 
             evaluated = cast(Error, evaluated)
             self.assertEquals(evaluated.message, expected)
+            print(evaluated.inspect())
 
 
     def test_if_else_evaluation(self) -> None:
