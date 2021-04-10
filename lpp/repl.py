@@ -32,7 +32,7 @@ def _print_parse_erros(errors: List[str]):
         print(error)
 
 def _print_statement(statement:str, amount_space:int):
-    space: str='  '
+    space: str = '  '
     print(space * amount_space + statement)    
 
 def start_repl() -> None:

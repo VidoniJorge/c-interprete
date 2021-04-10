@@ -17,6 +17,7 @@ from lpp.object import (
     Boolean,
     Environment,
     Error,
+    Function,
     Integer,
     Object,
     Return
@@ -116,7 +117,19 @@ class EvaluatorTest(TestCase):
 
             evaluated = cast(Error, evaluated)
             self.assertEquals(evaluated.message, expected)
+    
+    def test_function_evaluation(self) -> None:
+        source: str = 'procedimiento(x) { x + 2; };'
+
+        evaluated = self._evaluate_test(source)
         
+        self.assertIsInstance(evaluated, Function)
+
+        evaluated = cast(Function, evaluated)
+        self.assertEquals(len(evaluated.parameters),1)
+        self.assertEquals(str(evaluated.parameters[0]),'x')
+        self.assertEquals(str(evaluated.body), '(x + 2)')
+
     def test_if_else_evaluation(self) -> None:
         tests: List[Tuple[str: Any]] = [
             ('si (verdadero) {10}', 10),
