@@ -15,6 +15,7 @@ from lpp.evaluator import (
 from lpp.lexer import Lexer
 from lpp.object import (
     Boolean,
+    Environment,
     Error,
     Integer,
     Object,
@@ -23,6 +24,18 @@ from lpp.object import (
 from lpp.parser import Parser
 
 class EvaluatorTest(TestCase):
+
+    def test_assignment_evaluation(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('variable a = 5; a;', 5),
+            ('variable a = 5 * 5; a;', 25),
+            ('variable a = 5; variable b = a; b;', 5),
+            ('variable a = 5; variable b = a; variable c = a + b + 5; c;', 15),
+        ]
+        
+        for source, expected in tests:
+            evaluated = self._evaluate_test(source)
+            self._test_integer_object(evaluated, expected)
 
     def test_bang_operator(self) -> None:
         tests: List[Tuple[str:bool]] = [
@@ -93,6 +106,7 @@ class EvaluatorTest(TestCase):
                  }
              ''',
              'Operador desconocido: BOOLEAN / BOOLEAN'),
+             ('foobar;', 'Identificador no encontrado: foobar'),
         ]
 
         for source, expected in tests:
@@ -102,9 +116,7 @@ class EvaluatorTest(TestCase):
 
             evaluated = cast(Error, evaluated)
             self.assertEquals(evaluated.message, expected)
-            print(evaluated.inspect())
-
-
+        
     def test_if_else_evaluation(self) -> None:
         tests: List[Tuple[str: Any]] = [
             ('si (verdadero) {10}', 10),
@@ -169,8 +181,9 @@ class EvaluatorTest(TestCase):
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
         program: Program = parser.parse_program()
+        end: Enviroment = Environment()
 
-        evaluated = evaluate(program)
+        evaluated = evaluate(program, end)
 
         assert evaluated is not None
         return evaluated

@@ -6,12 +6,13 @@ from os import system, name
 
 from lpp.ast import Program
 from lpp.lexer import Lexer
+from lpp.object import Environment
+
 from lpp.parser import Parser
 from lpp.token import (
     Token,
     TokenType
 )
-
 from lpp.evaluator import evaluate
 
 #EOF_TOKEN: Token = Token(TokenType.EOF, '')
@@ -35,11 +36,13 @@ def _print_statement(statement:str, amount_space:int):
     print(space * amount_space + statement)    
 
 def start_repl() -> None:
+    scanned: List[str] = []
     while  (source := input('>> ')) != 'salir()':
         if source == "limpiar()":
             clear()
         else:
-            lexer: Lexer = Lexer(source)
+            scanned.append(source)
+            lexer: Lexer = Lexer(' '.join(scanned))
             parser: Parser = Parser(lexer)
             
             program: Program = parser.parse_program()
@@ -48,7 +51,8 @@ def start_repl() -> None:
                 _print_parse_erros(parser.errors)
                 continue
             
-            evaluated = evaluate(program)
+            env: Environment = Environment()
+            evaluated = evaluate(program, env)
             if evaluated is not None:
                 print(evaluated.inspect())
 

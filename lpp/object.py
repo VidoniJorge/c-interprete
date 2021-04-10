@@ -8,6 +8,8 @@ from enum import(
     Enum,
 )
 
+from typing import Dict
+
 class ObjectType(Enum):
     BOOLEAN = auto()
     ERROR = auto()
@@ -35,6 +37,20 @@ class Boolean(Object):
 
     def inspect(self) -> str:
         return 'verdadero' if self.value else 'falso'
+
+class Environment(Dict):
+
+    def __init__(self):
+        self._store = dict()
+    
+    def __getitem__(self,key):
+        return self._store[key]
+    
+    def __setitem__(self, key, value):
+        self._store[key] = value
+    
+    def __delitem__(self, key):
+        del self._store[key]
 
 class Error(Object):
 
