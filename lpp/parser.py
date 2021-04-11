@@ -108,7 +108,6 @@ class Parser:
         if self._peek_token.token_type == token_type:
             self._advance_token()
             return True
-        
         self._expected_token_error(token_type)
         return False
     
@@ -152,7 +151,6 @@ class Parser:
 
     def _parse_call_arguments(self) -> Optional[List[Expression]]:
         arguments: List[Expression] = []
-
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.RPAREN:
             self._advance_token()

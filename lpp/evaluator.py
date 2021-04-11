@@ -23,11 +23,11 @@ TRUE = Boolean(True)
 FALSE = Boolean(False)
 NULL = Null()
 
+_NOT_A_FUNCTION = 'No es una funcion: {}'
 _TYPE_MISMATCH = 'Discrepancia de tipos: {} {} {}'
 _UNKNOWN_PREFIX_OPERATOR = 'Operador desconocido: {}{}'
 _UNKNOWN_INFIX_OPERATOR = 'Operador desconocido: {} {} {}'
 _UNKNOWN_IDENTIFIER = 'Identificador no encontrado: {}'
-
 
 def evaluate(node:ast.ASTNode, env: Environment) -> Optional[Object]:
     node_type: Type = type(node)
@@ -97,7 +97,30 @@ def evaluate(node:ast.ASTNode, env: Environment) -> Optional[Object]:
                         node.body,
                         env)
     
+    elif node_type == ast.Call:
+        node = cast(ast.Call, node)
+        function = evaluate(node.function, env)
+        assert function is not None
+        assert node.arguments is not None
+        args = _evaluate_expression(node.arguments, env)
+
+        assert function is not None
+        return _apply_function(function, args, node.token.line)
+
     return None
+
+def _apply_function(fn: Object, args: List[Object],line_evaluated: int) -> Object:
+    if type(fn) != Function:
+        return _new_error(_NOT_A_FUNCTION, args, line_evaluated)
+    
+    fn = cast(Function, fn)
+
+    extended_enviroment = _extended_function_enviroment(fn, args)
+    evaluated = evaluate(fn.body, extended_enviroment)
+    
+    assert evaluated is not None
+    return _unwrap_return_value(evaluated)
+    
 
 def _evaluate_bang_operator_expression(right: Object) -> Object:
     if right is TRUE:
@@ -108,6 +131,24 @@ def _evaluate_bang_operator_expression(right: Object) -> Object:
         return TRUE
     else:
         return FALSE
+
+def _evaluate_expression(expressions: List[ast.Expression], env: Environment) -> List[Object]:
+    result: List[Object] = []
+
+    for expression in expressions:
+        evaluated = evaluate(expression, env)
+        assert evaluated is not None
+        result.append(evaluated)
+    
+    return result
+
+def _extended_function_enviroment(fn: Function, args: List[Object]) -> Environment:
+    env = Environment(outer=fn.env)
+
+    for idx, param in enumerate(fn.parameters):
+        env[param.value] = args[idx - 1]
+    
+    return env
 
 def _evaluate_identifier(node: ast.Identifier, env: Environment, line_evaluated:int) -> Object:
     try:
@@ -227,6 +268,13 @@ def _evaluate_program(program: ast.Program, env) -> Optional[Object]:
 
 def _new_error(message: str, args:List[Any], error_line: int) -> Error:
     return Error(message.format(*args), error_line)
+
+def _unwrap_return_value(obj: Object) -> Object:
+    if type(obj) == Return:
+        obj = cast(Return, obj)
+        return obj.value
+    
+    return obj
 
 def _to_boolean_object(value: bool) -> Boolean:
     return TRUE if value else FALSE

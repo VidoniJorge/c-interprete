@@ -49,11 +49,20 @@ class Boolean(Object):
 
 class Environment(Dict):
 
-    def __init__(self):
+    def __init__(   self, 
+                    # outer : tiene el valor que de un entorno exterior, esto es para poder manejar distintos niveles de 
+                    # scope en las variables
+                    outer = None ):
         self._store = dict()
+        self._outer = outer
     
     def __getitem__(self,key):
-        return self._store[key]
+        try:
+            return self._store[key]
+        except KeyError as e:
+            if self._outer is not None:
+                return self._outer[key]
+            raise e
     
     def __setitem__(self, key, value):
         self._store[key] = value
