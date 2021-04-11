@@ -20,6 +20,7 @@ from lpp.ast import (
     Prefix,
     Program,
     LetStatement,
+    StringLiteral,
     ReturnStatement,
     ExpressionStatement
 )
@@ -76,9 +77,6 @@ class ParserTest(TestCase):
 
             for idx, param in enumerate(test['expected_params']):
                 self._test_literal_expression(function.parameters[idx],param)
-
-
-
 
     def test_parse_program(self) -> None:
         source: str = 'variable x = 5;'
@@ -155,6 +153,18 @@ class ParserTest(TestCase):
 
         self.assertEquals(len(parser.errors), 1)
     
+    def test_string_literal_expression(self) -> None:
+        source: str = '"hello world!"'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+        program: Program = parser.parse_program()
+
+        expression_ststement= cast(ExpressionStatement, program.statements[0])
+        string_literal = cast(StringLiteral, expression_ststement.expression)
+
+        self.assertIsInstance(string_literal, StringLiteral)
+        self.assertEquals(string_literal.value, 'hello world!')
+
     def test_return_statement(self) -> None:
         source: stc = '''
             regresa 5;

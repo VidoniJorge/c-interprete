@@ -20,6 +20,7 @@ from lpp.object import (
     Function,
     Integer,
     Object,
+    String,
     Return
 )
 from lpp.parser import Parser
@@ -203,6 +204,20 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_test(source)
             self._test_integer_object(evaluated, expected)
+
+    def test_string_evaluation(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('"Hello world!"','Hello world!'),
+            ('procedimiento() { regresa "Que buena onda"} ()','Que buena onda'),
+            
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_test(source)
+            self.assertIsInstance(evaluated, String)
+
+            evaluated = cast(String, evaluated)
+            self.assertEquals(evaluated.value, expected)
 
     def test_return_evaluation(self) -> None:
         tests: List[Tuple[str, int]] = [

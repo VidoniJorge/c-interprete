@@ -24,8 +24,9 @@ class ObjectType(Enum):
     FUNCTION = auto()
     INTEGER = auto()
     NULL = auto()
+    STRING = auto()
     RETURN = auto()
-
+    
 class Object(ABC):
 
     @abstractclassmethod
@@ -128,3 +129,16 @@ class Return(Object):
     
     def inspect(self) -> str:
         return self.value.inspect()
+
+class String(Object):
+    
+    def __init__(self, value: str) -> None:
+        self.value = value
+    
+    def type(self) -> ObjectType:
+        return ObjectType.STRING
+    
+    def inspect(self) -> str:
+        return self.value
+
+

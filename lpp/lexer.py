@@ -72,6 +72,9 @@ class Lexer:
         elif self._is_number_(self._character):
             literal = self._read_number()
             return Token(TokenType.INT, literal, self._current_line)
+        elif match(r'^"$', self._character):
+            literal = self._read_string()
+            return Token(TokenType.STRING, literal, self._current_line)
         else:
             token = Token(TokenType.ILLEGAL, self._character, self._current_line)
 
@@ -106,6 +109,17 @@ class Lexer:
         
         return self._source[initial_position:self._position]
 
+    def _read_string(self) -> str:
+        self._read_caracter()
+        initial_position = self._position
+
+        while self._character != '"' and self._read_position <= len(self._source):
+            self._read_caracter()
+        
+        string = self._source[initial_position:self._position]
+        self._read_caracter()
+        return string
+        
     # Es una letra valida
     def _is_letter(self, character) -> bool:
         return bool(match(r'[a-zàèìòùA-ZÀÈÌÒÙñÑ_]',character))
