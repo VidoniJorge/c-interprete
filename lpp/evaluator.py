@@ -200,6 +200,9 @@ def _evaluate_infix_expression(operator:str, left:Object, right:Object, line_eva
     if left.type() == ObjectType.INTEGER \
         and right.type() == ObjectType.INTEGER:
         return _evaluate_integer_infix_expression(operator, left, right, line_evaluated)
+    if left.type() == ObjectType.STRING \
+        and right.type() == ObjectType.STRING:
+        return _evaluate_string_infix_expression(operator, left, right, line_evaluated)
     elif operator == '==':
         return _to_boolean_object(left is right)
     elif operator == '!=':
@@ -240,6 +243,23 @@ def _evaluate_integer_infix_expression(operator: str, left: Object, right: Objec
                 operator,
                 right.type().name
             ], line_evaluated)
+
+def _evaluate_string_infix_expression(operator: str, left: Object, right: Object, line_evaluated:int) -> Object:
+    left_value = str = cast(String, left).value
+    right_value = str = cast(String, right).value
+
+    if operator == '+':
+        return String(left_value + right_value)
+    elif operator == '==':
+        return _to_boolean_object(left_value == right_value)
+    elif operator == '!=':
+        return _to_boolean_object(left_value != right_value)
+    else:
+        return _new_error(_UNKNOWN_INFIX_OPERATOR,[left.type().name,
+                operator,
+                right.type().name
+            ], line_evaluated)
+
 
 def _evaluate_minus_operator_expression(right: Object, line_evaluated:int) -> Object:
     if type(right) != Integer:
